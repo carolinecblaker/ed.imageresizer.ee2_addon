@@ -60,7 +60,7 @@ Class Ed_imageresizer
     // ADD PATHS TO YOUR WEB ROOT AND CACHE FOLDER HERE
     private $server_path        = ''; // no trailing slash
     private $cache_path         = ''; // with trailing slash
-    
+    private $output_path        = ' ';  //leave blank unless using with CDN or alternate url delivery 
     private $memory_limit       = '36M'; // the memory limit to set
 
     private $EE                 = FALSE;
@@ -157,22 +157,23 @@ Class Ed_imageresizer
         elseif( $this->image == '' && $this->default_image != '' ) {
             $this->image = $this->default_image;
         }
-        
+      
         // if we get here an image has been set so make sure it starts with a slash.
         if($this->image{0} != '/') { $this->image = '/'.$this->image;}
-            
+           
         // For security, directories cannot contain ':', images cannot contain '..' or '<', and images must start with '/'
         if (strpos(dirname($this->image), ':') || preg_match('/(\.\.|<|>)/', $this->image)) {
             return array(false, 'fatal', 'Image path is invalid. Image: '.$this->image);
         }
-            
+          
         // If the image doesn't exist, or we haven't been told what it is, there's nothing that we can do
         if(!file_exists($this->server_path . $this->image) || is_dir($this->server_path . $this->image)) {
+           
             return array(false, 'fatal', 'The image does not exist. Server path: '.$this->server_path . $this->image);
         }
         
         // Get the size and MIME type of the requested image
-        
+       
         $this->size        = GetImageSize($this->server_path . $this->image);
         $this->mime        = $this->size['mime'];
         $mtime       = $file_info['date'];
@@ -424,7 +425,7 @@ Class Ed_imageresizer
         
         $this->image_tag .= ' width="'.$width.'" height="'.$height.'" ';
         
-        $image_path = str_replace($this->server_path, '', $this->resized);
+        $image_path = str_replace($this->server_path, $this->output_path, $this->resized);
         
         $this->image_tag .= 'src="'.$image_path.'" />';
         
